@@ -1,0 +1,16 @@
+#define _FORTIFY_SOURCE 0
+#include <stdio.h>
+#include <string.h>
+
+int main (void)
+{
+	char src[24] = "C Programming";
+	char dest[16];
+
+	scanf("%s", dest);	
+
+	printf("dest: %s\n", dest);
+	printf("src: %s\n", src);
+
+	return 0;
+}
