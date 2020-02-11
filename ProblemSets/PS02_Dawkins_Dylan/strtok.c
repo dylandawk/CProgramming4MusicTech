@@ -19,12 +19,12 @@ int main (void)
 			break;
 		}
 
-		//find the word before a " " and print it
-		char* word = strtok(line, " ");
-		while (word != NULL)
+		//find the word before " " and print it
+		char *tok = strtok(line, " \t\n");
+		while (tok != NULL)
 		{
-			printf("%s\n", word);
-			word  = strtok(NULL, " ");
+			printf("%s\n", tok);
+			tok  = strtok(NULL, " \t\n");
 		}
 	}
 	return 0;

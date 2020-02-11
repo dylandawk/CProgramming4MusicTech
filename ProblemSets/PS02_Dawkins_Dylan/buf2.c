@@ -5,7 +5,7 @@
 int main (void)
 {
 	char src[24] = "C Programming is so fun";
-	char dest[16];
+	char dest[16]; 
 
 	strcpy(dest, src);	
 

@@ -4,16 +4,26 @@
 
 int main (void)
 {
-	int pascal[16][16];
-	pascal[0][0] = 1;
-	for(int i = 1; i <= 16; i++)
+	const int rows = 16;
+	int pascal[rows][rows];
+
+	for(int i = 0; i < rows; i++)
 	{
-		for (int j = 1; j <= 16; j++)
+		for (int j = 0; j < rows; j++)
 		{
-			pascal[i][j] = pascal[i-1][j-1] + pascal[i-1][j];
+			if(i == 0) //first row condition 
+			{
+				if( j == 0) pascal[i][j] = 1;
+				else pascal[i][j] = 0;
+			} 
+			else if (j == 0)//first index condition
+			{
+				pascal[i][j] = 1;
+			}
+			else pascal[i][j] = pascal[i-1][j-1] + pascal[i-1][j];
 			if(pascal[i][j] != 0)
 			{
-				printf("%5d", pascal[i][j]);	
+				printf("%5d", pascal[i][j]);
 			}
 		}
 		printf("\n");
