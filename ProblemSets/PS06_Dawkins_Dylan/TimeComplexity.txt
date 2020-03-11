@@ -1,0 +1,9 @@
+Big-O Time Complexity:
+1. Linear Search: O(n) (slow)
+2. Binary Search: O(log2n) (fast)
+3. Hash Search: O(c) (fastest)
+
+Tradeoffs:
+Binary search requires the list to be sorted before hand
+Hash search requires a hash map to be created before hand
+both of these processes require a larger amount of computing initially, but lead to faster searches.
