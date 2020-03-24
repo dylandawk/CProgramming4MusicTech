@@ -45,120 +45,140 @@ static int paCallback( const void *inputBuffer, void *outputBuffer,
 
 int main(int argc, char *argv[])
 {
-  	char ifilename[MAX_IFILES][MAX_PATH_LEN], ch;
-  	int i, selection;
-  	unsigned int num_input_files, samp_rate, num_chan;
-  	FILE *fp;
-  	/* my data structure */
-  	Buf iBuf, *p = &iBuf;
-  	/* PortAudio stream */
-    PaStream *stream;
+  char ifilename[MAX_IFILES][MAX_PATH_LEN], ch;
+  int i, selection;
+  unsigned int num_input_files, samp_rate, num_chan;
+  FILE *fp;
+  /* my data structure */
+  Buf iBuf, *p = &iBuf;
+  /* PortAudio stream */
+  PaStream *stream;
 
-  	/* zero libsndfile structures */
-  	for (i=0; i<MAX_IFILES; i++) {
-    		memset(&p->sfinfo[i], 0, sizeof(p->sfinfo[i]));
-  	}
+  /* zero libsndfile structures */
+  for (i=0; i<MAX_IFILES; i++) {
+      memset(&p->sfinfo[i], 0, sizeof(p->sfinfo[i]));
+  }
 
-  	/* 
-  	 * Parse command line and open all files 
-  	 */
-    //Your code here
+  /* 
+    * Parse command line and open all files 
+    */
+  //Your code here
 
-    // Usage
-    if(argc != 2){
-        printf("ERROR %s inputFile.txt (where inputFile.txt contails list of playable WAV audio files) \n", argv[0]);
+  // Usage
+  if(argc != 2){
+      printf("ERROR %s inputFile.txt (where inputFile.txt contails list of playable WAV audio files) \n", argv[0]);
+      return -1;
+  } 
+
+  /* open list of files */
+  //Your code here
+  fp = fopen(argv[1], "r");
+  if (fp == NULL)
+  {
+          printf("ERROR: cannot open %s\n", argv[1]);
+          return -1;
+  }
+
+  /* read WAV filenames from the list in ifile_list.txt */
+  /* print information about each WAV file */
+  //Your code here
+  num_input_files = 0;
+  while((fscanf(fp, "%s", ifilename[num_input_files]) != EOF)){
+    p -> sndfile[num_input_files] = sf_open(ifilename[num_input_files], SFM_READ, &p -> sfinfo[num_input_files]);
+    num_input_files ++;
+  }
+
+  printf("Number of input files: %d\n", num_input_files);
+
+
+
+  /* check for compatibility of input WAV files
+    * If sample rates don't match, print error and exit 
+    * If number of channels don't match or too many channels, print error and exit
+    * if too many channels, print error and exit
+    */
+  //Your code here
+  for(int i = 0; i < num_input_files; i++){
+    //compare sample rates and channels
+    if(i != num_input_files -1){
+      if(p->sfinfo[i].samplerate != p->sfinfo[i+1].samplerate){
+        printf("ERROR: Sample rates of file %d and %d do not match\n", i, i+1);
+        printf("Sample rate of file %d = %d\n", i+1, p->sfinfo[i+1].samplerate);
         return -1;
+      } else if(p->sfinfo[i].channels != p->sfinfo[i+1].channels){
+        printf("ERROR: Channels of file %d and %d do not match\n", i, i+1);
+        return -1;
+      }
     } 
-
-  	/* open list of files */
-    //Your code here
-    fp = fopen(argv[1], "r");
-	  if (fp == NULL)
-    {
-            printf("ERROR: cannot open %s\n", argv[1]);
-            return -1;
+    //check wav format
+    if(p->sfinfo[i].format != SF_FORMAT_WAV){
+      printf("ERROR: file %d is not a WAV file. File Format = %d, WAV Format = %d\n", i, p->sfinfo[i].format, SF_FORMAT_WAV);
+      return -1;
     }
-
-    /* read WAV filenames from the list in ifile_list.txt */
-    /* print information about each WAV file */
-    //Your code here
-    num_input_files = 0;
-    while((fscanf(fp, "%s", ifilename[num_input_files]) != EOF)){
-      p -> sndfile[num_input_files] = sf_open(ifilename[num_input_files], SFM_READ, &p -> sfinfo[num_input_files]);
-      num_input_files ++;
+    //check # of channels
+    if(p->sfinfo[i].channels > 2){
+      printf("ERROR: file %d have too many channels\n", i);
+      return -1;
     }
+    printf("Files checked successfully\n");
+  }
 
-    printf("Number of input files: %d\n", num_input_files);
-
-
-
-   	/* check for compatibility of input WAV files
-     * If sample rates don't match, print error and exit 
-     * If number of channels don't match or too many channels, print error and exit
-     * if too many channels, print error and exit
-     */
-    //Your code here
-    for(int i = 0; i < num_input_files; i++){
-      //compare sample rates and channels
-      if(i != num_input_files -1){
-        if(iBuf.sfinfo[i].samplerate != iBuf.sfinfo[i+1].samplerate){
-          printf("ERROR: Sample rates of file %d and %d do not match\n", i, i+1);
-          printf("Sample rate of file %d = %d\n", i+1, iBuf.sfinfo[i+1].samplerate);
-          return -1;
-        } else if(iBuf.sfinfo[i].channels != iBuf.sfinfo[i+1].channels){
-          printf("ERROR: Channels of file %d and %d do not match\n", i, i+1);
-          return -1;
-        }
-      } 
-      //check wav format
-      if(iBuf.sfinfo[i].format != SF_FORMAT_WAV){
-        printf("ERROR: file %d is not a WAV file. File Format = %d, WAV Format = %d\n", i, iBuf.sfinfo[i].format, SF_FORMAT_WAV);
-        return -1;
-      }
-      //check # of channels
-      if(iBuf.sfinfo[i].channels > 2){
-        printf("ERROR: file %d have too many channels\n", i);
-        return -1;
-      }
-      printf("Files checked successfully\n");
+  /* initialize data structure 
+    * set number of channels 
+    * and set selection to -1 so initially only "zeros" are played
+    */
+  p->num_chan = p->sfinfo[0].channels;
+  p->selection = -1;
   
-    }
+  
+  /* pause so user can read console printout */
+  sleep(2);
 
-  	/* initialize data structure 
-     * set number of channels 
-     * and set selection to -1 so initially only "zeros" are played
-     */
+  /* start up Port Audio */
+  stream = startupPa(2, p->sfinfo[0].channels, 
+  samp_rate, FRAMES_PER_BUFFER, paCallback, &iBuf);
+
+  /* Initialize ncurses 
+    * to permit interactive character input 
+    */
+  initscr(); /* Start curses mode */
+  cbreak();  /* Line buffering disabled */
+  noecho(); /* Uncomment this if you don't want to echo characters when typing */  
+
+  printw("Select input file by number:\n");
+  //Your code here
+  for(int i = 0; i < num_input_files; i ++){
+    printw("%d   Option %d\n", i+1, i+1); //lines 1-N where N is number of input files
+  }
+  printw("Q to quit\n"); // line N+1     
+  printw("\n"); // line N+2              
+  printw("Current selection is %d. New Selection: ", p->selection); //line N+3. don't print newline
+	refresh();
+
+	ch = '\0'; /* Init ch to null character */
+	while (ch != 'q' && ch != 'Q') {
+		ch = getch();
+        /* limit to allowable options */
+        if (ch >= '1' && ch <= num_input_files + '0') {
+            p->selection = ch - '1' + 1; //convert to integer
+        }
+        mvprintw(8, 0, "Current selection is %2d. New Selection: ", p->selection);
+        refresh();
+	}
+
+
+  /* shut down Ncurses */
+  endwin();
+
+  /* shut down Port Audio */
+  shutdownPa(stream);
     
-    /* pause so user can read console printout */
-    sleep(2);
+  /* Close all WAV files */
+  for (i=0; i<num_input_files; i++) {
+      sf_close (p->sndfile[i]);
+  }
 
-    /* start up Port Audio */
-    stream = startupPa(2, p->sfinfo[0].channels, 
-      samp_rate, FRAMES_PER_BUFFER, paCallback, &iBuf);
-
-  	/* Initialize ncurses 
-     * to permit interactive character input 
-     */
-  	initscr(); /* Start curses mode */
-  	cbreak();  /* Line buffering disabled */
-  	noecho(); /* Uncomment this if you don't want to echo characters when typing */  
-
-    printw("Select input file by number:\n");
-    //Your code here
-    //moveprintw
-
-  	/* shut down Ncurses */
-  	endwin();
-
-    /* shut down Port Audio */
-    shutdownPa(stream);
-     
-  	/* Close all WAV files */
-  	for (i=0; i<num_input_files; i++) {
-    		sf_close (p->sndfile[i]);
-  	}
-
-    return 0;
+  return 0;
 }
 
 
@@ -184,6 +204,15 @@ static int paCallback(const void *inputBuffer, void *outputBuffer,
      * then rewind and read remaining samples
      */
     //Your code here
+    if(p->selection != -1) {
+      memset(output, 0, sizeof(output));
+    } else {
+      sf_read_float(p->sndfile[p->selection], output, count);
+      if(count < framesPerBuffer){
+        sf_seek(p->sndfile, 0, SF_SEEK_SET);
+        sf_read_float(p->sndfile[p->selection], output, count);
+      }
+    }
 
     return 0;
 }
