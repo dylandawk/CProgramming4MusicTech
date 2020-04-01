@@ -57,6 +57,7 @@ int main(int argc, char *argv[])
 
     /* initialize portaudio callback data structure */
     //Your code here
+    pb->num_chan = NUM_CHAN;
     pt->key = -1;
     pt->phase_inc = -1;
     pt->phase = 0.0;
@@ -104,7 +105,6 @@ int main(int argc, char *argv[])
 
     ch = 0;
     while (ch != ' ') {
-        printf("1\n");
         ch =getch();
         if(key2index[(int)ch] != -1){
             int freq_index = key2index[(int)ch];
@@ -113,6 +113,7 @@ int main(int argc, char *argv[])
             pt->phase = 0.0;
             pt->attack_amp = 0.0;
             pt->decay_amp = 1.0;
+            mvprintw(6,0, "Letter %c phase_inc %f\n", ch, pt->phase_inc);
             mvprintw(7,0, "Key %3d,     New key: ", freq_index);
         } else {
             
@@ -155,12 +156,13 @@ static int paCallback(
     float *output = (float *)outputBuffer;
     double v = 0.0;
 
+    if(pt->decay_amp < DROP_LEVEL) pt->phase_inc = -1;
     // loop over outputframes
     
     for(int i = 0; i< framesPerBuffer; i ++){
         v = 0.0;
         if(pt->phase_inc != -1){
-            v += FS_AMPL * sin(pt->phase) * (1-pt->attack_amp) * (pt->decay_amp);
+            v = FS_AMPL * sin(pt->phase) * (1-pt->attack_amp) * (pt->decay_amp);
             pt->phase += pt->phase_inc;
             pt->decay_amp *= pt->decay_factor;
             pt->attack_amp *= pt->attack_factor;
@@ -170,7 +172,6 @@ static int paCallback(
            //loop over channels in frame and write v to channel 
                output[i*pb->num_chan+j] = v;
         }
-        if(v < DROP_LEVEL) pt->phase_inc = -1;
 
     }
 
