@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     osfinfo.channels = isfinfo.channels;
     osfinfo.format = isfinfo.format;
     osfinfo.sections = isfinfo.sections;
-    osfinfo.seekable  = osfinfo.seekable;
+    osfinfo.seekable  = isfinfo.seekable;
 
 
     num_chan = isfinfo.channels;

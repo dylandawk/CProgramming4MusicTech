@@ -19,6 +19,7 @@ Equalizer::Equalizer(void) {
     }
     //initialize band_center_freq[]
     int size  = sizeof(octave_bands) / sizeof(float);
+    
     for(int i = 0; i < size; i ++){
         band_center_freq[i] = octave_bands[i];
     }
@@ -137,8 +138,8 @@ void Equalizer::filter_band(const float *ibuf, double *obuf_band, FiltCoef *pfc,
         obuf_band[n] = y;
     }
     // copy
-    for(int i = 0; i < MAX_COEF; i++){
-        obuf_state[i] = obuf_band[num_frames - MAX_COEF + i];
+    for(int i = 0; i < MAX_COEF-1; i++){
+        obuf_state[(MAX_COEF -1) - i] = obuf_band[(num_frames - 1) - i];
     }
 }
 
